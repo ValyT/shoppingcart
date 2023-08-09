@@ -6,32 +6,31 @@ import queue
 class ShoppingCart(abc.ShoppingCart):
     def __init__(self):
         self._items = dict()
-        self.order = queue.Queue()
+        self._order = queue.Queue()
 
     def add_item(self, product_code: str, quantity: int):
         if product_code not in self._items:
             self._items[product_code] = quantity
-            self.order.put(product_code)
+            self._order.put(product_code)
         else:
             q = self._items[product_code]
             self._items[product_code] = q + quantity
 
     def print_receipt(self) -> typing.List[str]:
         lines = []
-
+        total=0
         
-        #for item in self._items.items():
-        while not self.order.empty():
+        while not self._order.empty():
             
-            product_code=self.order.get()
+            product_code=self._order.get()
             amount=self._items[product_code]
 
             price = self._get_product_price(product_code) * amount
+            total+=price
+            price_string = '€%.2f' % price
 
-            price_string = "€%.2f" % price
-
-            lines.append(product_code + " - " + str(amount) + ' - ' + price_string)
-
+            lines.append(product_code + ' - ' + str(amount) + ' - ' + price_string)
+        lines.append('Total = ' + '€%.2f' % total)
         return lines
 
     def _get_product_price(self, product_code: str) -> float:
